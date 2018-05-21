@@ -1,4 +1,4 @@
-/*Package ward provides tooling to connect to the Old Dominion API.  This is for truck shipments,
+/*Package odfl provides tooling to connect to the Old Dominion API.  This is for truck shipments,
 not small parcels.  Think LTL (less than truckload) shipments.  This code was created off the Ward API
 documentation.  This uses and XML SOAP API.
 
@@ -9,8 +9,8 @@ Currently this package can perform:
 
 To create a pickup request:
 - Set test or production mode (SetProductionMode()).
-- Set shipper information (ShipperInfomation{}).
-- Set shipment data (Shipment{}).
+- Set shipper information (Shipper{}).
+- Set shipment data (Consignee{}).
 - Create the pickup request object (PickupRequest{}).
 - Request the pickup (RequestPickup()).
 - Check for any errors.
