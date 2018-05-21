@@ -13,7 +13,6 @@ To create a pickup request:
 - Request the pickup (RequestPickup()).
 - Check for any errors.
 */
-
 package odfl
 
 import (
