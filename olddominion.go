@@ -121,6 +121,18 @@ type Consignee struct {
 	Description   string `xml:"description"`
 }
 
+//PickupRequestError is the data format returned when a pickup request is made and fails
+type PickupRequestError struct {
+	XMLName        xml.Name       `xml:"Envelope"`
+	PickupResponse PickupResponse `xml:"Body>pickupResponse"`
+}
+type PickupResponse struct {
+	PickupReturn PickupReturn `xml:"pickupReturn"`
+}
+type PickupReturn struct {
+	ErrorMessages string `xml:"errorMessages"`
+}
+
 //SetProductionMode chooses the production url for use
 func SetProductionMode(yes bool) {
 	if yes {
@@ -138,7 +150,7 @@ func SetTimeout(seconds time.Duration) {
 }
 
 //RequestPickup performs the call to the ODFL API to schedule a pickup
-func (p *PickupRequest) RequestPickup() (responseData map[string]interface{}, err error) {
+func (p *PickupRequest) RequestPickup() (responseData PickupRequestError, err error) {
 	//add xml attributes
 	p.SoapenvAttr = soapenv
 	p.PicAttr = pic
@@ -180,7 +192,19 @@ func (p *PickupRequest) RequestPickup() (responseData map[string]interface{}, er
 		return
 	}
 
-	log.Println(responseData)
+	//check if data was returned meaning request was successful
+	//if not, reread the response data and log it
+	if true {
+		log.Println("odfl.RequestPickup - pickup request failed")
+		log.Printf(string(body))
+
+		var errorData PickupRequestError
+		xml.Unmarshal(body, &errorData)
+
+		err = errors.New("odfl.RequestPickup - pickup request failed")
+		err = errors.Wrap(err, errorData.PickupResponse.PickupReturn.ErrorMessages)
+		return
+	}
 
 	//pickup request successful
 	//response data will have confirmation info
