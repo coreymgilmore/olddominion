@@ -51,8 +51,8 @@ type PickupRequest struct {
 	SoapenvAttr string `xml:"xmlns:soapenv,attr"`
 	PicAttr     string `xml:"xmlns:pic,attr"`
 
-	Shipper   Shipper   `xml:"soapenv:Header>soapenv:Body>pic:pickupRequest>shipper"`
-	Consignee Consignee `xml:"soapenv:Header>soapenv:Body>pic:pickupRequest>consignees>Consignee"`
+	Shipper   Shipper   `xml:"soapenv:Body>pic:pickupRequest>shipper"`
+	Consignee Consignee `xml:"soapenv:Body>pic:pickupRequest>consignees>Consignee"`
 }
 
 //Shipper is the data on the shipper
@@ -139,13 +139,6 @@ func SetTimeout(seconds time.Duration) {
 
 //RequestPickup performs the call to the ODFL API to schedule a pickup
 func (p *PickupRequest) RequestPickup() (responseData map[string]interface{}, err error) {
-	//convert the pickup request to an xml
-	xmlBytes, err := xml.Marshal(p)
-	if err != nil {
-		err = errors.Wrap(err, "odfl.RequestPickup - could not marshal xml")
-		return
-	}
-
 	//add xml attributes
 	p.SoapenvAttr = soapenv
 	p.PicAttr = pic
@@ -153,11 +146,19 @@ func (p *PickupRequest) RequestPickup() (responseData map[string]interface{}, er
 	//set test mode
 	p.Shipper.TestFlag = testMode
 
-	//make the call to the ward API
+	//convert the pickup request to an xml
+	xmlBytes, err := xml.Marshal(p)
+	if err != nil {
+		err = errors.Wrap(err, "odfl.RequestPickup - could not marshal xml")
+		return
+	}
+
+	//make the call to the odfl API
 	//set a timeout since golang doesn't set one by default and we don't want this to hang forever
 	httpClient := http.Client{
 		Timeout: timeout,
 	}
+
 	res, err := httpClient.Post(odURL, "text/xml", bytes.NewReader(xmlBytes))
 	if err != nil {
 		err = errors.Wrap(err, "odfl.RequestPickup - could not make post request")
@@ -174,6 +175,7 @@ func (p *PickupRequest) RequestPickup() (responseData map[string]interface{}, er
 
 	err = xml.Unmarshal(body, &responseData)
 	if err != nil {
+		log.Println(string(body))
 		err = errors.Wrap(err, "odfl.RequestPickup - could not read response 2")
 		return
 	}
