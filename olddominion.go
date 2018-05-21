@@ -2,8 +2,6 @@
 not small parcels.  Think LTL (less than truckload) shipments.  This code was created off the Ward API
 documentation.  This uses and XML SOAP API.
 
-You will need to have a Ward account and register for access to use this.
-
 Currently this package can perform:
 - pickup requests
 
